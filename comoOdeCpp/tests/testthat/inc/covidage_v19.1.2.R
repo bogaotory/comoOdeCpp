@@ -341,7 +341,7 @@ parameters["vaccine_eff_r"]<-parameters["vaccine_eff_r"]/100
 # age_vaccine_min<-(parameters["age_vaccine_min"])
 # age_vaccine_max<-(parameters["age_vaccine_max"])
 # parameters["vaccine_cov"]<-parameters["vaccine_cov"]/100
-# parameters["vac_campaign"]<-parameters["vac_campaign"]*7
+parameters["vac_campaign"]<-parameters["vac_campaign"]*7
 parameters["screen_test_sens"]<-parameters["screen_test_sens"]/100
 parameters["quarantine_days"]<-parameters["quarantine_days"]
 parameters["quarantine_effort"]<-1/parameters["quarantine_effort"]
@@ -705,7 +705,7 @@ dmod_vector <- pmin(dmMax, dmod_vector)
     c_mod<-rep(0,tail(times,1)*20)
   }
 
-cmod_vector <- pmin(1 / parameters["sigmaR"], cmod_vector)
+cmod_vector <- pmin(100, cmod_vector)
 
   ##  self isolation
   f<-c()
@@ -1429,7 +1429,7 @@ critV <- round(critV * to_keep) / to_keep
          testage<-input$testage[t*20+1]
          dmod_vector<-(input$dmod_vector[t*20+1])
          pmod_vector<-(input$pmod_vector[t*20+1])
-         cmod_vector<-(input$cmod_vector[t*20+1])
+         cmod_vector<-(input$cmod_vector[t*20+1])/100
          # print(paste("dmod: ",dmod_vector))
          # print(paste("pmod: ",pmod_vector))
          # print(paste("cmod: ",cmod_vector))
@@ -1447,10 +1447,13 @@ critV <- round(critV * to_keep) / to_keep
                       pdeath_icu_hco)
              }
          }else{dm<-1}
+         # if (cmod){
+         #   cm<-cmod_vector
+         #   if (cm*sigmaR>1){cm<-1/sigmaR}
+         # }else{cm<-1}
          if (cmod){
-           cm<-cmod_vector
-           if (cm*sigmaR>1){cm<-1/sigmaR}
-         }else{cm<-1}
+           sigmaR_mod<-cmod_vector
+         }else{sigmaR_mod<-sigmaR}
          if (vaccine){
            age_vaccine_vector<-as.numeric(age_group_vectors[[vaccineage]])
            vac_rate<-(-log(1-vaccine_cov)/vac_campaign)
@@ -1637,7 +1640,7 @@ critV <- round(critV * to_keep) / to_keep
            gamma*pclin_vr*(1-age_testing_vector*ratetestEVR)*(1-selfis)*(1-sigmaEVR*ihr[,2])*(1-quarantine_rate)*EVR+
            gamma*pclin_r*(1-age_testing_vector*ratetestER)*(1-selfis)*(1-sigmaER*ihr[,2])*(1-quarantine_rate)*ER-
            nui*CL+ageing%*%CL-mort*CL+(1/quarantine_days)*QC-ratetestC*age_testing_vector*CL
-         dRdt <- vac_dur_r*VR-omega*R-vaccinate*age_vaccine_vector*R-lam*sigmaR*cm*R-quarantine_rate*R+
+         dRdt <- vac_dur_r*VR-omega*R-vaccinate*age_vaccine_vector*R-lam*sigmaR_mod*R-quarantine_rate*R+
            nui*I+nui*X+nui*CL+ageing%*%R-mort*R+(1/isolation_days)*Z+(1/quarantine_days)*QR+ 
            nus*propo2*(1-dexo2*pdeath_ho*dm)*ifr[,2]*H+nus*(1-propo2)*(1-pdeath_h*dm)*ifr[,2]*H+
            nusc*propo2*(1-pdeath_hco*dm)*ifr[,2]*HC+nusc*(1-propo2)*(1-pdeath_hc*dm)*ifr[,2]*HC+  
@@ -1658,7 +1661,7 @@ critV <- round(critV * to_keep) / to_keep
            -nui*X+ageing%*%X-mort*X 
          dVdt <- vaccinate*age_vaccine_vector*S + omega*VR - (1-vaccine_eff)*lam*V - vac_dur*V + ageing%*%V-mort*V - quarantine_rate*V
          dEVdt<- (1-vaccine_eff)*lam*V - gamma*EV + ageing%*%EV - mort*EV - quarantine_rate*EV +(1/quarantine_days)*QEV
-         dERdt<- lam*sigmaR*cm*R - gamma*ER + ageing%*%ER - mort*ER - quarantine_rate*ER +(1/quarantine_days)*QER
+         dERdt<- lam*sigmaR_mod*R - gamma*ER + ageing%*%ER - mort*ER - quarantine_rate*ER +(1/quarantine_days)*QER
          dVRdt <- vaccinate*age_vaccine_vector*E + vaccinate*age_vaccine_vector*I + vaccinate*age_vaccine_vector*R -
            (1-vaccine_eff_r)*lam*VR - vac_dur_r*VR + ageing%*%VR - mort*VR - omega*VR - quarantine_rate*VR + (1/quarantine_days)*QVR
          dEVRdt<- (1-vaccine_eff_r)*lam*VR - gamma*EVR + ageing%*%EVR-mort*EVR - quarantine_rate*EVR +
@@ -1682,10 +1685,10 @@ critV <- round(critV * to_keep) / to_keep
            gamma*(1-sigmaER*ihr[,2])*pclin_r*QER + 
            gamma*(1-sigmaEVR*ihr[,2])*pclin_vr*QEVR -
            nui*QC+ageing%*%QC-mort*QC - (1/quarantine_days)*QC
-         dQRdt <- quarantine_rate*R + nui*QI + nui*QC + ageing%*%QR-mort*QR - (1/quarantine_days)*QR - sigmaR*cm*lamq*QR + vac_dur_r*QVR
+         dQRdt <- quarantine_rate*R + nui*QI + nui*QC + ageing%*%QR-mort*QR - (1/quarantine_days)*QR - sigmaR_mod*lamq*QR + vac_dur_r*QVR
          dQVdt <- quarantine_rate*V + ageing%*%QV-mort*QV - (1/quarantine_days)*QV - (1-vaccine_eff)*lamq*QV + omega*QVR 
          dQEVdt <- quarantine_rate*EV - gamma*QEV + ageing%*%QEV-mort*QEV - (1/quarantine_days)*QEV + (1-vaccine_eff)*lamq*QV 
-         dQERdt <- quarantine_rate*ER - gamma*QER + ageing%*%QER-mort*QER - (1/quarantine_days)*QER + sigmaR*cm*lamq*QR 
+         dQERdt <- quarantine_rate*ER - gamma*QER + ageing%*%QER-mort*QER - (1/quarantine_days)*QER + sigmaR_mod*lamq*QR 
          dQVRdt <- quarantine_rate*VR - (1-vaccine_eff_r)*lam*QVR - vac_dur_r*QVR - omega*QVR + ageing%*%QVR - mort*QVR 
          dQEVRdt <- quarantine_rate*EVR - gamma*QEVR +ageing%*%QEVR-mort*QEVR -
            (1/quarantine_days)*QEVR +(1-vaccine_eff_r)*lamq*QVR 
