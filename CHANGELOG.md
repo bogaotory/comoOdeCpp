@@ -1,4 +1,15 @@
-# 19.1.1
+# v19.1.2
+
+  - Based off a meeting (15 July 2021)
+
+## Changed
+
+  - Changing unit of Breakthrough infection probability from RR back to percent.
+    - value from template 0 ~ 100
+    - `cmod`(`cm`) replaces `sigmaR`
+
+
+# v19.1.1
 
   - Based off `covidage_v19.1.R` (12 July 2021)
   - Ref `covidage_v19.1_original.R -> covidage_v19.1.1.original.diff`
@@ -12,6 +23,7 @@
 ## Changed
 
  - Breakthrough infection probability : Unit changed from percentage (%) to Relative risk (RR)
+   - `cmod` scales `sigmaR`
 
 ## Updated
 
