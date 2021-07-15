@@ -569,11 +569,11 @@ List covidOdeCpp(
 
     double dmod_vector = as<NumericVector>(input["dmod_vector"])[my_t];
     double pmod_vector = as<NumericVector>(input["pmod_vector"])[my_t];
-    double cmod_vector = as<NumericVector>(input["cmod_vector"])[my_t];
+    double cmod_vector = as<NumericVector>(input["cmod_vector"])[my_t]/100.0;
 
     double dm = 1.0;
     double pm = 1.0;
-    double cm = 1.0;
+    double sigmaR_mod = sigmaR;
     // double sig = sigmaR;
     if (dmod) {
       dm = dmod_vector;
@@ -582,7 +582,7 @@ List covidOdeCpp(
       pm = pmod_vector;
     }
     if (cmod) {
-      cm = cmod_vector;
+      sigmaR_mod = cmod_vector;
     }
 
 
@@ -895,7 +895,7 @@ List covidOdeCpp(
                         + vac_dur_r*VR
                         - omega*R
                         - vaccinate*age_vaccine_vector%R
-                        - lam*sigmaR*cm%R
+                        - lam*sigmaR_mod%R
                         - quarantine_rate*R                        
                         ;
 
@@ -927,7 +927,7 @@ List covidOdeCpp(
                         - quarantine_rate*EV
                         + (1.0/quarantine_days)*QEV
                         ;
-      arma::vec dERdt = lam*sigmaR*cm%R
+      arma::vec dERdt = lam*sigmaR_mod%R
                         - gamma*ER
                         + ageing*ER
                         - mort_col%ER
@@ -997,7 +997,7 @@ List covidOdeCpp(
                       + ageing*QR
                       - mort_col%QR
                       - (1.0/quarantine_days)*QR
-                      - sigmaR*cm*lamq%QR
+                      - sigmaR_mod*lamq%QR
                       + quarantine_rate*R
                       + vac_dur_r*QVR
                       ;
@@ -1023,7 +1023,7 @@ List covidOdeCpp(
                         + ageing*QER
                         - mort_col%QER
                         - (1.0/quarantine_days)*QER
-                        + sigmaR*cm*lamq%QR 
+                        + sigmaR_mod*lamq%QR 
                         ;
 
       arma::vec dQVRdt = quarantine_rate*VR
