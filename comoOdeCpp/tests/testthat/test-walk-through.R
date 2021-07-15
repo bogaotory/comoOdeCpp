@@ -1,13 +1,11 @@
-test_that("Walk-through (v19.1.1) of the model code", {
+test_that("Walk-through (v19.1.2) of the model code", {
   # skip("temp skip")
 
   rm(list = ls())
   source(paste0(getwd(), "/common.R"), local = environment())
   init(e = environment())
 
-  # file_path <- paste0(getwd(), "/data/templates_v16.8/Template_CoMoCOVID-19App_v17_all_interventions.xlsx")
-  # file_path <- paste0(getwd(), "/data/templates_v19.1.1/Template_CoMoCOVID-19App_v19.xlsx")
-  file_path <- paste0(getwd(), "/data/templates_v19.1.1/Template_CoMoCOVID-19App_v19_all_interventions.xlsx")
+  file_path <- paste0(getwd(), "/data/templates_v19.1.2/Template_CoMoCOVID-19App_v19_all_interventions.xlsx")
 
   if (!exists("inputs", mode = "function")) {
     source(paste0(getwd(), CORE_FILE), local = environment())
@@ -140,7 +138,7 @@ test_that("Walk-through (v19.1.1) of the model code", {
           output_a = out_r,
           output_b = out_cpp,
           tlr = 0.0001,
-          smp = 1000
+          smp = 10000
         )
       }
 
